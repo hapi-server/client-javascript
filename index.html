@@ -1,0 +1,46 @@
+<html>
+<body>
+  <h3>Javascript HAPI client demo</h3>
+  <p>Download and edit <a href="javascript.html">javascript.html</a> for copy-and-paste template.</p>
+  <p>Or, use the <a href="https://hapi-server.org/servers">HAPI server interface</a> to generate a script.</p>
+  <p>See <a href="timeTest.html">timeTest.html</a> for a demonstration of how different Javascript libraries handle <a href="https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#376-representation-of-time">HAPI time strings</a>.</p>
+
+  <button type="button" onclick="run()">Run</button>
+
+  <pre id="script" style="border:1px solid black;overflow-x: scroll;" contenteditable="true">
+server = 'http://hapi-server.org/servers/TestData2.0/hapi'
+dataset = 'dataset1';
+// Use parameters='' to request all data. Multiple parameters
+// can be requested using a comma-separated list, e.g., parameters='X_TOD,Y_TOD'
+parameters = 'scalar';
+start = '1970-01-01T00:00:00.000Z';
+stop = '1970-01-01T00:00:10.000Z';
+
+function cb(data, meta) {
+  let c = document.getElementById('console');
+  c.insertAdjacentText('beforeend','\ndata = ' + JSON.stringify(data, null, 4));
+  c.insertAdjacentText('beforeend','\n\nmeta = ' + JSON.stringify(meta, null, 4));
+  console.log(data);
+  console.log(meta);      
+}
+
+// Defaults
+opts = {'renameTime': true, 'raw': false, 'jsTimeNumber': false, 'jsDateObject': false};
+hapi(server, dataset, parameters, start, stop, cb, opts);    
+  </pre>
+
+  <pre id="console" style="border:1px solid black;overflow-x: scroll;"></pre>
+
+  <script src="0.0.1/moment-2.29.3.min.js"></script>
+  <script src="0.0.1/hapi-0.0.1.js"></script>
+  <script type="text/javascript">
+    function run() {
+      document.getElementById('console').textContent = '';
+      let script = document.getElementById('script').textContent;
+      console.log(script);
+      eval(script);
+    }
+    run();
+  </script>
+</body>
+</html>

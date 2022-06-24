@@ -1,21 +1,16 @@
 <html>
 <body>
   <pre id="console"></pre>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
-  <script src="hapi.js"></script>
+  <script src="//hapi-server.github.io/client-javascript/0.0.1/moment-2.29.3.min.js"></script>
+  <script src="//hapi-server.github.io/client-javascript/0.0.1/hapi-0.0.1.js"></script>
   <script>
-    //server     = SERVER;
-    server = 'http://hapi-server.org/servers/TestData2.0/hapi'
-    //dataset    = DATASET;
-    dataset = 'dataset1';
+    server     = SERVER;
+    dataset    = DATASET;
     // Use parameters='' to request all data. Multiple parameters
     // can be requested using a comma-separated list, e.g., parameters='X_TOD,Y_TOD'
-    //parameters = PARAMETERS;
-    parameters = 'scalar';
-    //start      = START;
-    start = '1970-01-01T00:00:00.000Z';
-    //stop       = STOP;
-    stop = '1970-01-01T00:00:10.000Z';
+    parameters = PARAMETERS;
+    start      = START;
+    stop       = STOP;
 
     function cb(data, meta) {
       let c = document.getElementById('console');
@@ -25,7 +20,7 @@
       console.log(meta);      
     }
 
-    // Defaults
+    // All options set to their default values
     opts = {'renameTime': true, 'raw': false, 'jsTimeNumber': false, 'jsDateObject': false};
     hapi(server, dataset, parameters, start, stop, cb, opts);
 
