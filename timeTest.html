@@ -1,0 +1,170 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <body>
+  <pre id="console"></pre>
+
+  <script src="//cdn.jsdelivr.net/npm/dayjs@1.11.3/dayjs.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+  <script>
+  dts_unixTime = 599616000000;
+  dts = [
+      "1989Z",
+
+      "1989-01Z",
+
+      "1989-001Z",
+      "1989-01-01Z",
+
+      "1989-001T00Z",
+      "1989-01-01T00Z",
+
+      "1989-001T00:00Z",
+      "1989-01-01T00:00Z",
+
+      "1989-001T00:00:00.Z",
+      "1989-01-01T00:00:00.Z",
+
+      "1989-01-01T00:00:00.0Z",
+      "1989-001T00:00:00.0Z",
+
+      "1989-01-01T00:00:00.00Z",
+      "1989-001T00:00:00.00Z",
+
+      "1989-01-01T00:00:00.000Z",
+      "1989-001T00:00:00.000Z",
+
+      "1989-01-01T00:00:00.0000Z",
+      "1989-001T00:00:00.0000Z",
+
+      "1989-01-01T00:00:00.00000Z",
+      "1989-001T00:00:00.00000Z",
+
+      "1989-01-01T00:00:00.000000Z",
+      "1989-001T00:00:00.000000Z"
+    ];
+
+    dts2_unixTime = 602294400000;
+    dts2 = [
+      "1989-031Z",
+      "1989-02-01Z",
+
+      "1989-032T00Z",
+      "1989-02-01T00Z",
+
+      "1989-032T00:00Z",
+      "1989-02-01T00:00Z",
+
+      "1989-032T00:00:00.Z",
+      "1989-02-01T00:00:00.Z",
+
+      "1989-02-01T00:00:00.0Z",
+      "1989-032T00:00:00.0Z",
+
+      "1989-02-01T00:00:00.00Z",
+      "1989-032T00:00:00.00Z",
+
+      "1989-02-01T00:00:00.000Z",
+      "1989-032T00:00:00.000Z",
+
+      "1989-02-01T00:00:00.0000Z",
+      "1989-032T00:00:00.0000Z",
+
+      "1989-02-01T00:00:00.00000Z",
+      "1989-032T00:00:00.00000Z",
+
+      "1989-02-01T00:00:00.000000Z",
+      "1989-032T00:00:00.000000Z"
+    ];
+
+    let c = document.getElementById('console');
+    function testParse(dtString, unixTime, library) {
+      let d, isValid;
+      if (library === 'native') {
+        d = new Date(dtString);
+        isValid = !isNaN(d);
+        isCorrect = d.valueOf() == unixTime
+      }
+      if (library.startsWith('moment')) {
+        d = moment(dtString);
+        isValid = d._isValid;
+        isCorrect = d.valueOf() == unixTime
+      }
+      if (library .startsWith('dayjs')) {
+        d = dayjs(dtString);
+        isValid = !isNaN(d);
+        isCorrect = d.valueOf() == unixTime
+      }
+
+      if (isValid && isCorrect) {
+        msg = "  +" + library + " pass";
+      }
+      if (isValid && !isCorrect) {
+        msg = "  -" + library + " fail; unixTime of " + (d.valueOf()) + " != " + unixTime;
+      }
+      if (!isValid) {
+        msg = "  -" + library + " fail; unixTime of " + (d.valueOf());
+      }
+      console.log(msg);
+      c.insertAdjacentText('beforeend','\n' + msg);
+    }
+    dts.forEach( (el) => {
+      console.log(el);
+      c.insertAdjacentText('beforeend','\n' + el);
+      testParse(el, dts_unixTime, 'native')
+      testParse(el, dts_unixTime, 'moment.js 2.29.3')
+      testParse(el, dts_unixTime, 'dayjs 1.11.3')
+    })
+    dts2.forEach( (el) => {
+      console.log(el);
+      c.insertAdjacentText('beforeend','\n' + el);
+      testParse(el, dts2_unixTime, 'native')
+      testParse(el, dts2_unixTime, 'moment.js 2.29.3')
+      testParse(el, dts2_unixTime, 'dayjs 1.11.3')
+    })
+
+    function hapitime2UnixTime(dtStrings) {
+      Time = [];
+      dtStrings.forEach(dtString => {
+        Time.push(moment(dtString).valueOf());        
+      })
+      return Time;
+    }
+    function hapitime2jsDate(dtStrings) {
+      Time = [];
+      dtStrings.forEach(dtString => {
+        Time.push(moment(dtString)._d);
+      })
+      return Time;
+    }
+
+    //https://github.com/hapi-server/client-python/blob/master/hapiclient/test/test_hapitime2datetime.py
+    let url = 'http://hapi-server.org/servers/TestData2.0/hapi/data?id=dataset1&parameters=vector&time.min=1970-01-01Z&time.max=1970-01-01T00:00:11Z&format=json&include=header';
+    fetch(url).then(res => res.json()).then(cb);
+
+    function cb(json) {
+      console.log(json)
+      let data = {};
+      json.parameters.forEach( (el,idx) => {
+        let parameter = el['name'];
+        data[parameter] = [];
+        json.data.forEach( (row) => {
+          data[parameter].push(row[idx]);
+        })
+      })
+      let meta = json;
+      delete meta.data
+      console.log(data);
+      console.log(meta);
+      let timeName = meta['parameters'][0]['name'];
+      Time = data[timeName];
+      console.log(Time);
+      // Unix time (milliseconds since January 1, 1970) is native Javascript time.
+      unixTime = hapitime2UnixTime(Time);
+      jsDate = hapitime2jsDate(Time);
+      console.log(unixTime);
+      console.log(jsDate);
+      console.log(jsDate[1].valueOf())
+    }
+  </script>
+  </body>
+</html>
